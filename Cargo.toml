@@ -1,0 +1,38 @@
+[package]
+name = "nm-proxy"
+version = "0.1.0"
+edition = "2021"
+authors = ["Dennis Marttinen <twelho@welho.tech>"]
+description = "Native messaging proxy for Flatpak'ed browsers"
+repository = "https://github.com/twelho/nm-proxy"
+license = "GPL-3.0-or-later"
+keywords = ["browser", "flatpak", "native-messaging", "ipc"]
+categories = ["command-line-utilities"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "client"
+path = "src/client/main.rs"
+
+[[bin]]
+name = "daemon"
+path = "src/daemon/main.rs"
+
+[profile.release]
+lto = true      # Enable link-time optimizations
+strip = true    # Strip symbols from the binary
+
+[dependencies]
+anyhow = "1.0.75"
+byteorder = "1.5.0"
+expanduser = "1.2.2"
+libc = "0.2.149"
+log = "0.4.20"
+rust-ini = "0.19.0"
+serde = { version = "1.0.189", features = ["derive"] }
+serde_json = "1.0.107"
+tokio = { version = "1.33.0", features = ["full"] }
+tokio-fd = "0.3.0"
+toml = "0.8.2"
+tracing-subscriber = "0.3.17"

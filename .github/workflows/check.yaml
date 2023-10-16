@@ -1,0 +1,38 @@
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+name: Check PR
+jobs:
+  conform:
+    name: Conformance
+    runs-on: ubuntu-latest
+    container:
+      image: golang:1
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Fetch master branch for reference
+        run: git fetch origin master:master
+        if: github.ref_name != 'master'
+      - name: Install siderolabs/conform
+        run: go install github.com/siderolabs/conform/cmd/conform@latest
+      - name: Run siderolabs/conform
+        run: conform enforce
+  rustfmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+      - name: Install Rust toolchain for formatting
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt
+      - name: rustfmt check
+        uses: actions-rust-lang/rustfmt@v1

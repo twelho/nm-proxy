@@ -1,0 +1,30 @@
+policies:
+  - type: commit
+    spec:
+      header:
+        length: 89
+        imperative: true
+        case: lower
+        invalidLastCharacters: .
+      dco: true
+      gpg:
+        required: true
+      spellcheck:
+        locale: US
+      maximumOfOneCommit: true
+      conventional:
+        types:
+          - ci
+          - docs
+          - refactor
+          - release
+          - test
+  - type: license
+    spec:
+      skipPaths:
+        - .git/
+      includeSuffixes:
+        - .rs
+      allowPrecedingComments: true
+      header: |
+        // SPDX-License-Identifier: GPL-3.0-or-later
