@@ -12,7 +12,7 @@ pub trait OsStringIntoString {
 impl OsStringIntoString for OsString {
     fn into_string_result(self) -> Result<String> {
         self.into_string()
-            .map_err(|s| anyhow!("Failed to parse path as string").context(format!("{:?}", s)))
+            .map_err(|s| anyhow!("{:?}", s).context("Failed to parse OS string as String"))
     }
 }
 

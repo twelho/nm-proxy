@@ -2,21 +2,21 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 use std::env;
-use std::os::unix::prelude::*;
 use std::path::PathBuf;
 
-use anyhow::{anyhow, bail, Context, Result};
-use tokio::fs::read_dir;
+use anyhow::{anyhow, Context, Result};
 use tokio::io::copy;
 use tokio::net::UnixStream;
-use tokio::signal;
 use tokio::task::JoinSet;
+use tokio::{fs, signal};
 use tokio_fd::AsyncFd;
 
 use nm_proxy::common;
+use nm_proxy::common::constants::*;
+use nm_proxy::common::traits::*;
 
 async fn parse_args() -> Result<(String, Vec<String>)> {
-    let mut args = env::args().collect::<Vec<_>>().into_iter();
+    let mut args = env::args();
     let invocation_path = args
         .next()
         .ok_or(anyhow!("Unable to acquire invocation path"))?;
@@ -26,34 +26,26 @@ async fn parse_args() -> Result<(String, Vec<String>)> {
             let manifest_name = file_name
                 .to_os_string()
                 .into_string()
-                .map_err(|s| anyhow!("Failed to parse file name {:?}", s))?;
+                .map_err(|s| anyhow!("{:?}", s).context("Failed to parse file name"))?;
             return Ok((manifest_name, vec![manifest_path, app_id]));
         }
     }
 
-    bail!(
+    Err(anyhow!(
         "Usage: {} <app-manifest-path> <extension-id>\n\
         This binary should be invoked by a browser through native messaging.",
         invocation_path
-    )
+    ))
 }
 
 async fn find_socket() -> Result<String> {
     let runtime_dir = common::parse_env("XDG_RUNTIME_DIR", None)?;
-
-    let mut stream = read_dir(&runtime_dir)
+    let mut stream = fs::read_dir(&runtime_dir)
         .await
-        .with_context(|| format!("Failed to read {}", runtime_dir))?;
+        .path_context(&runtime_dir)?;
 
-    while let Some(entry) = stream
-        .next_entry()
-        .await
-        .with_context(|| format!("Failed to access entry in {}", runtime_dir))?
-    {
-        let name = entry
-            .file_name()
-            .into_string()
-            .map_err(|s| anyhow!("Failed to parse file name {:?}", s))?;
+    while let Some(entry) = stream.next_entry().await.path_context(&runtime_dir)? {
+        let name = entry.file_name().into_string_result()?;
 
         //eprintln!("Parsing file: {}, type: {:?}", name, entry.file_type().await?);
         // TODO: is_socket() does not work in Flatpak, bug in Rust? Debug information:
@@ -65,19 +57,16 @@ async fn find_socket() -> Result<String> {
         if entry
             .file_type()
             .await
-            .with_context(|| format!("Failed to read type of {}", name))?
+            .path_context(entry.path())?
             .is_file()
-            && name.starts_with(common::SOCKET_PREFIX)
+            && name.starts_with(SOCKET_PREFIX)
+            && name.ends_with(SOCKET_SUFFIX)
         {
-            return Ok(entry
-                .path()
-                .into_os_string()
-                .into_string()
-                .map_err(|s| anyhow!("Failed to parse path {:?}", s))?);
+            return Ok(entry.path().into_string_result()?);
         }
     }
 
-    bail!("No valid socket found in {}", runtime_dir)
+    Err(anyhow!("No valid socket found in {}", runtime_dir))
 }
 
 #[tokio::main]
@@ -88,7 +77,8 @@ async fn main() -> Result<()> {
     // Connect to the socket
     let stream = UnixStream::connect(&socket_path)
         .await
-        .with_context(|| format!("Failed to connect to socket {}", socket_path))?;
+        .context(socket_path)
+        .context("Failed to connect to socket")?;
 
     // Split the socket stream into RX/TX
     let (mut socket_rx, mut socket_tx) = stream.into_split();
@@ -138,6 +128,6 @@ async fn main() -> Result<()> {
     if graceful {
         Ok(())
     } else {
-        bail!("Unclean shutdown, did the socket close?")
+        Err(anyhow!("Unclean shutdown, did the socket close?"))
     }
 }

@@ -1,9 +1,10 @@
 // (c) Dennis Marttinen 2023
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+use crate::common;
+use crate::common::constants::*;
 use anyhow::{Context, Error, Result};
 use expanduser::expanduser;
-use nm_proxy::common;
 use serde::de::Error as DeError;
 use serde::{Deserialize, Deserializer};
 use std::collections::HashMap;
@@ -30,7 +31,7 @@ Ensure that it is present, and contains the following:
 # Example configuration:
 
 [daemon]
-proxy_client = "~/bin/nm-proxy-client"
+proxy_client = "~/path/to/client"
 
 [browsers.firefox]
 app_id = "org.mozilla.firefox"
@@ -67,7 +68,7 @@ pub struct Config {
 }
 
 impl Config {
-    fn browsers(&self) -> impl Iterator<Item = &String> {
+    pub fn browsers(&self) -> impl Iterator<Item = &String> {
         self.browsers.keys()
     }
 
@@ -105,11 +106,10 @@ fn path_parser<'de, D: Deserializer<'de>>(deserializer: D) -> Result<PathBuf, D:
     expanduser(s).map_err(|e| D::Error::custom(e))
 }
 
-// TODO: Cache the results of this
 pub async fn form_config_path() -> Result<PathBuf> {
     let mut path = expanduser(common::parse_env("XDG_CONFIG_HOME", Some("~/.config"))?)
-        .context("Path expansion failed")?;
-    path.push(common::CONFIG_DIR);
+        .context("Configuration file path expansion failed")?;
+    path.push(CONFIG_DIR);
     path.canonicalize()
         .context("Configuration file path canonicalization failed")
 }
@@ -121,9 +121,8 @@ async fn read_config(config_path: &Path) -> Result<Config> {
     toml::from_str(&contents).map_err(|e| Error::from(e))
 }
 
-pub async fn load_config() -> Result<Config> {
-    let mut path = form_config_path().await?;
-    path.push(common::CONFIG_FILE);
+pub async fn load_config(path: impl AsRef<Path>) -> Result<Config> {
+    let path = path.as_ref().join(CONFIG_FILE);
     read_config(&path)
         .await
         .with_context(|| format!("{}", path.display()))

@@ -13,13 +13,9 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 
-pub const SOCKET_PREFIX: &str = "nm-proxy-";
-pub const EXTENSION_KEY: &str = "extension";
-pub const CONFIG_DIR: &str = "nm-proxy";
-pub const CONFIG_FILE: &str = "config.toml";
-pub const APP_MANIFEST_DIR: &str = "manifest";
-pub const PROXY_CLIENT_BIN: &str = "nm-proxy-client";
-
+pub mod config;
+pub mod constants;
+pub mod runtime;
 pub mod traits;
 
 #[derive(Serialize, Deserialize)]
