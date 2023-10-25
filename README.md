@@ -4,15 +4,68 @@
 
 ## Architecture
 
-`nm-proxy` consists of a client and daemon binary. The client binary is executed by the Flatpak'ed browser, and forwards stdio through an exposed socket to the daemon on the host, which runs the native binary and forwards the socket traffic to its stdio.
+`nm-proxy` consists of a client, daemon, and setup binary. The client binary is executed by the Flatpak'ed browser, and forwards stdio through an exposed socket to the daemon on the host, which runs the native binary and forwards the socket traffic to its stdio. Sockets are handled by systemd to enable transparent daemon restarts without losing the inodes forwarded into the Flatpak namespaces.
 
-The daemon is intended to be run as a systemd user service, and will read its configuration as well as the [native manifests](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_manifests) from `~/.config/nm-proxy` (configuration guidelines will be printed if missing). On launch, the daemon takes care of installing the client binary and manifest as well configuring the Flatpak environment for each specified browser.
+The daemon is intended to be run as a systemd user service, and will read its configuration as well as the [native manifests](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_manifests) from `~/.config/nm-proxy` (guidelines will be printed if configuration is missing). The setup binary helps the daemon take care of installing the client binary and manifest as well configuring the Flatpak environment for each specified browser.
+
+The manifests themselves (`.json` files) must be supplied by the user. Here is the upstream manifest of the Plasma Integration extension, with which `nm-proxy` was tested during development:
+
+```json
+{
+  "name": "org.kde.plasma.browser_integration",
+  "description": "Native connector for KDE Plasma",
+  "path": "/usr/bin/plasma-browser-integration-host",
+  "type": "stdio",
+  "allowed_extensions": ["plasma-browser-integration@kde.org"]
+}
+```
+
+## Configuration
+
+```toml
+# nm-proxy 0.2.0 configuration file
+#
+# [daemon]
+# proxy_client = "/path/to/client" # Path to nm-proxy client binary
+#
+# [browsers.<name>] # Define configuration for browser <name>
+# app_id = "app.example.com" # Flatpak 3-part app ID
+# nmh_dir = ".<name>/native-messaging-hosts" # Native messaging host application directory
+#
+# Example configuration:
+
+[daemon]
+proxy_client = "~/path/to/client"
+
+[browsers.firefox]
+app_id = "org.mozilla.firefox"
+nmh_dir = ".mozilla/native-messaging-hosts"
+
+[browsers.librewolf]
+app_id = "io.gitlab.librewolf-community"
+nmh_dir = ".librewolf/native-messaging-hosts"
+
+[browsers.chromium]
+app_id = "org.chromium.Chromium"
+nmh_dir = ".config/chromium/NativeMessagingHosts"
+```
+
+## Installation
+
+```shell
+$ ./install.sh
+Usage: ./install.sh <browser>...
+<browser> refers to the name of a browser entry in the configuration file of
+the nm-proxy daemon. Examples include "firefox", "librewolf", and "chromium".
+```
 
 ## Building
 
+The following builds all three binaries:
+
 ```shell
-cargo build --bin client --release
-cargo build --bin daemon --release
+rustup target add x86_64-unknown-linux-musl
+cargo build --release
 ```
 
 ## Acknowledgements
