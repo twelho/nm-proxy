@@ -16,6 +16,12 @@ cargo build --release
 DAEMON_PATH=$(readlink -f target/x86_64-unknown-linux-musl/release/daemon)
 SETUP_PATH=$(readlink -f target/x86_64-unknown-linux-musl/release/setup)
 
+for browser in "$@"; do
+	systemctl --user stop "nm-proxy@$browser.socket" || true
+done
+
+systemctl --user stop nm-proxy.service || true
+
 cat >~/.config/systemd/user/nm-proxy-setup.service <<EOF
 [Unit]
 Description=nm-proxy setup helper
@@ -53,11 +59,6 @@ FileDescriptorName=%I
 WantedBy=sockets.target
 EOF
 
-for browser in "$@"; do
-	systemctl --user stop "nm-proxy@$browser.socket"
-done
-
-systemctl --user stop nm-proxy.service
 systemctl --user daemon-reload
 
 systemctl --user enable nm-proxy-setup.service
