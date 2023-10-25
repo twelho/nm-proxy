@@ -29,6 +29,7 @@ Description=nm-proxy setup helper
 [Service]
 #Environment=RUST_LOG=trace
 ExecStart="$SETUP_PATH"
+Type=oneshot
 
 [Install]
 WantedBy=default.target
