@@ -14,6 +14,8 @@ use tokio::{select, signal};
 use tokio_util::sync::CancellationToken;
 use tracing::instrument;
 use tracing::{error, info};
+use tracing_subscriber::filter::LevelFilter;
+use tracing_subscriber::EnvFilter;
 
 use nm_proxy::common;
 use nm_proxy::common::runtime::Settings;
@@ -100,7 +102,13 @@ impl ListenerConfig {
 #[instrument]
 async fn main() -> Result<()> {
     // Initialize the logging framework
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::builder()
+                .with_default_directive(LevelFilter::INFO.into())
+                .from_env_lossy(),
+        )
+        .init();
 
     // Parse sockets passed by systemd
     let mut sockets = parse_sockets().await?;
