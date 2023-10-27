@@ -20,6 +20,11 @@ The manifests themselves (`.json` files) must be supplied by the user. Here is t
 }
 ```
 
+> PSA: If using the Plasma Integration extension, remember to disable native MPRIS support to avoid double media controls:
+> 
+> - In Firefox-based browsers, disable `Control media via keyboard, headset, or virtual interface` in `about:preferences`
+> - In Chromium-based browsers, disable the flag `chrome://flags/#hardware-media-key-handling`
+
 ## Configuration
 
 ```toml
