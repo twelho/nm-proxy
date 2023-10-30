@@ -1,0 +1,28 @@
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+name: Build
+jobs:
+  build:
+    name: ${{ matrix.bin }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: x86_64-unknown-linux-musl
+      - name: Build ${{ matrix.bin }}
+        run: cargo build --bin ${{ matrix.bin }} --release
+      - name: Upload compiled binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: nm-proxy-${{ matrix.bin }}
+          path: target/x86_64-unknown-linux-musl/release/${{ matrix.bin }}
+    strategy:
+      matrix:
+        bin: [client, daemon, setup]
