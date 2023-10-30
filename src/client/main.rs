@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 use std::env;
+use std::os::unix::fs::FileTypeExt;
 use std::path::PathBuf;
 
 use anyhow::{anyhow, Context, Result};
@@ -54,11 +55,8 @@ async fn find_socket() -> Result<String> {
 
         // Pick the first file with a matching name, testing for sockets
         // with is_socket() does not work in a Flatpak for some reason
-        if entry
-            .file_type()
-            .await
-            .path_context(entry.path())?
-            .is_file()
+        let context = entry.file_type().await.path_context(entry.path())?;
+        if (context.is_socket() || context.is_file())
             && name.starts_with(SOCKET_PREFIX)
             && name.ends_with(SOCKET_SUFFIX)
         {
