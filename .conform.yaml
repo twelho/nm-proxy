@@ -15,6 +15,7 @@ policies:
       conventional:
         types:
           - ci
+          - deps
           - docs
           - refactor
           - release
