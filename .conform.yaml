@@ -14,8 +14,8 @@ policies:
       maximumOfOneCommit: true
       conventional:
         types:
+          - chore
           - ci
-          - deps
           - docs
           - refactor
           - release
