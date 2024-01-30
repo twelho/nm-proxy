@@ -1,5 +1,8 @@
 # nm-proxy
 
+[![Build](https://github.com/twelho/nm-proxy/actions/workflows/build.yaml/badge.svg)](https://github.com/twelho/nm-proxy/actions/workflows/build.yaml)
+[![dependency status](https://deps.rs/repo/github/twelho/nm-proxy/status.svg)](https://deps.rs/repo/github/twelho/nm-proxy)
+
 [Native messaging](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging) proxy for Flatpak'ed browsers. Temporary solution until https://github.com/flatpak/xdg-desktop-portal/issues/655 gets resolved, potentially by https://github.com/flatpak/xdg-desktop-portal/pull/705.
 
 ## Architecture

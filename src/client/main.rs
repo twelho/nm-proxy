@@ -52,6 +52,7 @@ async fn find_socket() -> Result<String> {
         // TODO: is_socket() does not work in Flatpak, bug in Rust? Debug information:
         //  Inside Flatpak: FileType(FileType { mode: 32768 })
         //  On host system: FileType(FileType { mode: 49152 })
+        //  https://github.com/rust-lang/rust/issues/27796
 
         // Pick the first file with a matching name, testing for sockets
         // with is_socket() does not work in a Flatpak for some reason
