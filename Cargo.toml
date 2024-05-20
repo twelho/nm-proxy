@@ -31,7 +31,7 @@ strip = true    # Strip symbols from the binary
 anyhow = "1.0.86"
 byteorder = "1.5.0"
 expanduser = "1.2.2"
-libc = "0.2.154"
+libc = "0.2.155"
 nix = { version = "0.28.0", features = ["signal"] }
 rust-ini = "0.21.0"
 sd-listen-fds = "0.2.0"
