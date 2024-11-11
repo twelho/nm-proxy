@@ -37,7 +37,7 @@ rust-ini = "0.21.1"
 sd-listen-fds = "0.2.0"
 serde = { version = "1.0.214", features = ["derive"] }
 serde_json = "1.0.132"
-tokio = { version = "1.41.0", features = ["full"] }
+tokio = { version = "1.41.1", features = ["full"] }
 tokio-fd = "0.3.0"
 tokio-util = "0.7.12"
 toml = "0.8.19"
