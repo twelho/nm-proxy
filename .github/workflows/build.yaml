@@ -19,7 +19,7 @@ jobs:
       - name: Build ${{ matrix.bin }}
         run: cargo build --bin ${{ matrix.bin }} --release
       - name: Upload compiled binaries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: nm-proxy-${{ matrix.bin }}
           path: target/x86_64-unknown-linux-musl/release/${{ matrix.bin }}
