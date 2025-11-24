@@ -14,7 +14,7 @@ jobs:
       options: --user 1001 # https://github.com/actions/runner/issues/2033#issuecomment-1598547465
     steps:
       - name: Check out sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install Rust toolchain for formatting
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
