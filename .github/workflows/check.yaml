@@ -34,7 +34,7 @@ jobs:
       - name: Check out sources
         uses: actions/checkout@v7
       - name: Install Rust toolchain for formatting
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
         with:
           components: rustfmt
       - name: rustfmt check
